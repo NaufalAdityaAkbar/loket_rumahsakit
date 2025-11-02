@@ -1,48 +1,71 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\GoogleController;
 
-// Redirect root to login page so users land on the login immediately after running the app
+// Public routes (no auth required) - Dapat diakses oleh semua user tanpa login
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('dashboard');
+})->name('home');
+
+// Queue management routes - Dapat diakses oleh semua user tanpa login
+Route::group(['as' => 'queue.'], function () {
+    Route::get('/display', function () {
+        return view('display');
+    })->name('display');
+
+    Route::get('/patient', function () {
+        return view('patient');
+    })->name('patient');
 });
 
-// Auth routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Auth routes (for petugas only) - Tetap bisa diakses manual, tapi hanya untuk petugas
+Route::group(['prefix' => 'petugas', 'as' => 'petugas.'], function () {
+    // Login routes
+    Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])
+        ->name('login')
+        ->middleware('guest');
+    Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'])
+        ->name('login.post')
+        ->middleware('guest');
+    
+    // Register routes
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register')->middleware('guest');
+    Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])
+        ->name('register.post')
+        ->middleware('guest');
 
-Route::post('/login', function () {
-    // Login logic will be implemented here
-    return redirect('/');
-})->name('login.post');
+    // Google OAuth Routes
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])
+        ->name('login.google')
+        ->middleware('guest');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])
+        ->name('login.google.callback')
+        ->middleware('guest');
+        
+    // Logout route
+    Route::post('/logout', function () {
+        Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
+        return redirect()->route('petugas.login');
+    })->name('logout')->middleware('auth');
+});
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+// Protected petugas routes - Hanya bisa diakses oleh petugas yang sudah login
+Route::group(['prefix' => 'petugas', 'as' => 'petugas.', 'middleware' => ['auth', 'role:petugas']], function () {
+    Route::get('/dashboard', function () {
+        return view('petugas.dashboard');
+    })->name('dashboard');
 
-Route::post('/register', function () {
-    // Register logic will be implemented here
-    return redirect('/login');
-})->name('register.post');
+    Route::get('/master/loket', function () {
+        return view('petugas.master.loket');
+    })->name('master.loket');
 
-Route::get('/login/google', function () {
-    // Google login logic will be implemented here
-    return redirect('/');
-})->name('login.google');
-
-// Frontend pages (Livewire components will be mounted in these views)
-Route::get('/patient', function () {
-    return view('patient');
-})->name('patient');
-
-Route::get('/petugas', function () {
-    return view('petugas');
-})->name('petugas');
-
-Route::get('/display', function () {
-    return view('display');
-})->name('display');
-
-// Temporary route for debugging
-// (debug route removed)
+    Route::get('/loket/{loket}', function ($loket) {
+        return view('petugas.loket', compact('loket'));
+    })->name('loket');
+});

@@ -7,7 +7,7 @@
     <i class="fas fa-user-md text-blue-500 mr-2"></i>Login
 </h2>
 <div class="rounded-md border" :class="darkMode ? 'border-gray-700' : 'border-gray-300'">
-    <form method="POST" action="{{ route('login') }}" class="space-y-4 p-5 rounded-md form-animate" :class="darkMode ? 'bg-gray-800' : 'bg-white'" x-data="{ email: '', password: '', remember: false }">
+    <form method="POST" action="{{ route('petugas.login.post') }}" class="space-y-4 p-5 rounded-md form-animate" :class="darkMode ? 'bg-gray-800' : 'bg-white'" x-data="{ email: '', password: '', remember: false }">
     @csrf
     <div class="group">
         <label class="block mb-2 font-medium" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
@@ -86,7 +86,7 @@
     </div>
     
     <a 
-        href="{{ route('login.google') }}" 
+        href="{{ route('petugas.login.google') }}" 
         class="flex items-center justify-center gap-2 border px-4 py-2 rounded-md w-full transition-colors duration-200"
         :class="darkMode ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'"
     >
@@ -103,7 +103,7 @@
 </div>
 <div class="mt-4 text-center">
     <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
-        Belum punya akun? <a href="{{ route('register') }}" class="text-blue-500 hover:underline">Daftar sekarang</a>
+        Belum punya akun? <a href="{{ route('petugas.register') }}" class="text-blue-500 hover:underline">Daftar sekarang</a>
     </p>
 </div>
 @endsection

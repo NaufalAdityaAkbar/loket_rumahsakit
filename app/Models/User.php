@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
+        'role',
+        'assigned_loket_id',
     ];
 
     /**
@@ -44,5 +48,28 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function assignedLoket()
+    {
+        return $this->belongsTo(Loket::class, 'assigned_loket_id');
+    }
+
+    public function isPetugas(): bool
+    {
+        return $this->role === 'petugas';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    public function hasLoketAccess(?int $loketId): bool
+    {
+        if (!$this->isPetugas()) {
+            return false;
+        }
+        return is_null($this->assigned_loket_id) || $this->assigned_loket_id === $loketId;
     }
 }

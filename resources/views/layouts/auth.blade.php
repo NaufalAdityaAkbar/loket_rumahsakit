@@ -94,9 +94,9 @@
 
                         <div class="border-t border-blue-400 pt-4 mt-4">
                             <p class="text-sm text-blue-100">
-                                @if(Route::currentRouteName() === 'login')
+                                @if(Route::currentRouteName() === 'petugas.login')
                                 Belum punya akun?
-                                <a href="{{ route('register') }}"
+                                <a href="{{ route('petugas.register') }}"
                                     class="text-white hover:underline font-bold transition-all hover:text-blue-200">
                                     Register <i class="fas fa-arrow-right ml-1"></i>
                                 </a>
