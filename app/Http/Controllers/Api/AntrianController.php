@@ -35,16 +35,8 @@ class AntrianController extends Controller
             'patient_name' => 'nullable|string|max:255',
         ]);
 
-        // Nomor bisa digenerate berdasarkan waktu + random atau urutan
-        // Sementara gunakan timestamp + random 2 digit untuk unikitas
-        $nomor = strtoupper(Str::random(2)) . '-' . now()->format('YmdHis');
-
-        $antrian = Antrian::create([
-            'nomor' => $nomor,
-            'loket_id' => $data['loket_id'] ?? null,
-            'patient_name' => $data['patient_name'] ?? null,
-            'status' => Antrian::STATUS_WAITING,
-        ]);
+        // Buat antrian menggunakan helper model agar format nomor konsisten per loket
+        $antrian = Antrian::generateForLoket($data['loket_id'] ?? null, $data['patient_name'] ?? null);
 
         // Response mengembalikan object antrian yang baru dibuat
         return response()->json($antrian, 201);
@@ -53,32 +45,12 @@ class AntrianController extends Controller
     // Panggil nomor berikutnya untuk suatu loket
     public function callNext(Loket $loket)
     {
-        // Cari antrian tertua dengan status waiting untuk loket tersebut
-        $next = Antrian::where('loket_id', $loket->id)
-            ->where('status', Antrian::STATUS_WAITING)
-            ->orderBy('created_at')
-            ->first();
-
-        if (! $next) {
-            // Jika tidak ada antrian pada loket tertentu, coba ambil antrian tanpa loket
-            $next = Antrian::whereNull('loket_id')
-                ->where('status', Antrian::STATUS_WAITING)
-                ->orderBy('created_at')
-                ->first();
-        }
+        $next = Antrian::callNextForLoket($loket->id);
 
         if (! $next) {
             return response()->json(['message' => 'No waiting queues'], 404);
         }
 
-        // Update status menjadi called dan simpan waktu panggil
-        $next->update([
-            'status' => Antrian::STATUS_CALLED,
-            'called_at' => now(),
-            'loket_id' => $loket->id,
-        ]);
-
-        // Return the called antrian so frontend display dapat menampilkan
         return response()->json($next);
     }
 

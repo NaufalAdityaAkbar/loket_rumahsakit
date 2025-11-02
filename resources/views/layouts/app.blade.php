@@ -5,12 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Antrian')</title>
-    <!-- Tailwind / Bootstrap / custom CSS boleh ditambahkan di sini -->
-    <link rel="stylesheet" href="/css/app.css">
-    <!-- Livewire styles (jika pakai Livewire) -->
-    @if (class_exists(\Livewire\Livewire::class))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    @endif
 </head>
 
 <body>
@@ -36,10 +32,7 @@
         </footer>
     </div>
 
-    <script src="/js/app.js"></script>
-    @if (class_exists(\Livewire\Livewire::class))
     @livewireScripts
-    @endif
 </body>
 
 </html>

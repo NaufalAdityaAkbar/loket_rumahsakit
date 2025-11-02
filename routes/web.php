@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Redirect root to login page so users land on the login immediately after running the app
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // Auth routes
@@ -42,3 +43,6 @@ Route::get('/petugas', function () {
 Route::get('/display', function () {
     return view('display');
 })->name('display');
+
+// Temporary route for debugging
+// (debug route removed)
