@@ -1,5 +1,5 @@
-<div wire:poll.2s class="min-h-screen flex items-center justify-center bg-slate-100 p-6">
-    <div class="w-full max-w-5xl">
+<div wire:poll.2s class="min-h-screen bg-slate-100 p-6">
+    <div class="w-full">
         <!-- Top header bar -->
         <div class="bg-blue-600 text-white rounded-t-lg px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -9,38 +9,48 @@
             <div class="text-sm opacity-90">LAYAR PEMANGGILAN ANTRIAN</div>
         </div>
 
-        <!-- Main cards -->
+        <!-- Main content -->
         <div class="bg-white rounded-b-lg shadow-lg p-8">
-            <!-- Current call card -->
-            <div class="bg-white rounded-lg border p-8 text-center">
-                <div class="text-sm text-gray-500 mb-2 flex items-center justify-center gap-2">
-                    <span class="inline-block">SEDANG DIPANGGIL</span>
-                    <span class="text-xs text-blue-500">wire:poll</span>
-                </div>
+            <!-- Loket Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($lokets as $loket)
+                    <div class="bg-white rounded-lg border shadow-sm">
+                        <!-- Loket Header -->
+                        <div class="bg-blue-500 text-white px-4 py-3 rounded-t-lg">
+                            <h3 class="font-semibold">{{ $loket->name }}</h3>
+                            <p class="text-xs opacity-80">{{ $loket->description }}</p>
+                        </div>
 
-                @php
-                    $current = (isset($called) && $called->count()) ? $called->first() : null;
-                @endphp
+                        <!-- Current Number -->
+                        @php
+                            $current = $loket->antrians->where('status', App\Models\Antrian::STATUS_CALLED)->first();
+                            $waiting = $loket->antrians->where('status', App\Models\Antrian::STATUS_WAITING)->take(3);
+                        @endphp
 
-                <div class="text-6xl font-extrabold text-slate-800">{{ $current ? $current->nomor : '-' }}</div>
-                <div class="mt-3 text-sm text-blue-600 font-semibold">Loket: {{ $current ? optional($current->loket)->name : 'Pendaftaran Umum' }}</div>
-            </div>
-
-            <!-- Next queue card -->
-            <div class="mt-8 bg-white rounded-lg border p-6">
-                <div class="text-sm text-gray-400 uppercase tracking-wide mb-4">Antrian Berikutnya</div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @if(isset($next) && $next->count())
-                        @foreach($next as $n)
-                            <div class="p-4 bg-slate-50 rounded shadow-sm">
-                                <div class="text-lg font-bold">{{ $n->nomor }}</div>
-                                <div class="text-xs text-gray-500">- Loket {{ optional($n->loket)->name ?? 'Umum' }}</div>
+                        <div class="p-4">
+                            <div class="text-center mb-4">
+                                <p class="text-sm text-gray-500 mb-1">SEDANG DILAYANI</p>
+                                <div class="text-4xl font-bold text-blue-600">
+                                    {{ $current ? $current->nomor : '-' }}
+                                </div>
                             </div>
-                        @endforeach
-                    @else
-                        <div class="col-span-3 text-center text-gray-400">Tidak ada antrian menunggu</div>
-                    @endif
-                </div>
+
+                            <!-- Next Numbers -->
+                            <div class="border-t pt-3">
+                                <p class="text-xs text-gray-500 mb-2">ANTRIAN BERIKUTNYA:</p>
+                                <div class="space-y-2">
+                                    @forelse($waiting as $antrian)
+                                        <div class="bg-gray-50 rounded px-3 py-2 text-sm">
+                                            <span class="font-semibold">{{ $antrian->nomor }}</span>
+                                        </div>
+                                    @empty
+                                        <p class="text-center text-gray-400 text-sm">Tidak ada antrian</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>

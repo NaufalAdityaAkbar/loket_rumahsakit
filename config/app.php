@@ -53,9 +53,11 @@ return [
 
         // Package Service Providers...
         Livewire\LivewireServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
 
         // Application Service Providers...
         App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
     ],
 
     /*

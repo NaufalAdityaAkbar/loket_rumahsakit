@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Antrian;
+use App\Models\Loket;
 use Livewire\Attributes\Lazy;
 
 #[Lazy]
@@ -19,19 +20,15 @@ class DisplayQueue extends Component
 
     public function render()
     {
-        // Ambil semua antrian yang sedang dipanggil
-        $called = Antrian::where('status', Antrian::STATUS_CALLED)
-            ->with('loket')
-            ->orderBy('called_at', 'desc')
-            ->get();
+        // Ambil semua loket
+        $lokets = Loket::with(['antrians' => function($query) {
+            $query->whereIn('status', [Antrian::STATUS_CALLED, Antrian::STATUS_WAITING])
+                ->orderBy('status', 'desc')  // Called first, then waiting
+                ->orderBy('called_at', 'desc')
+                ->orderBy('created_at', 'asc')
+                ->limit(4);  // 1 current + 3 next
+        }])->get();
 
-        // Ambil beberapa antrian berikutnya (waiting)
-        $next = Antrian::where('status', Antrian::STATUS_WAITING)
-            ->with('loket')
-            ->orderBy('created_at', 'asc')
-            ->limit(3)
-            ->get();
-
-        return view('livewire.display-queue', ['called' => $called, 'next' => $next]);
+        return view('livewire.display-queue', ['lokets' => $lokets]);
     }
 }
